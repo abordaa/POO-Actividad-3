@@ -1,0 +1,77 @@
+import ipywidgets as widgets
+from IPython.display import display
+import math
+
+nota1 = widgets.Text(description="Nota 1:")
+nota2 = widgets.Text(description="Nota 2:")
+nota3 = widgets.Text(description="Nota 3:")
+nota4 = widgets.Text(description="Nota 4:")
+nota5 = widgets.Text(description="Nota 5:")
+
+btn_calcular = widgets.Button(description="Calcular", button_style='success')
+btn_limpiar = widgets.Button(description="Limpiar", button_style='warning')
+
+lbl_promedio = widgets.Label(value="Promedio = ")
+lbl_desviacion = widgets.Label(value="Desviación = ")
+lbl_mayor = widgets.Label(value="Nota mayor = ")
+lbl_menor = widgets.Label(value="Nota menor = ")
+
+lbl_alerta = widgets.HTML(value="") 
+
+def calcular_estadisticas(b):
+    # Limpiar alertas previas
+    lbl_alerta.value = ""
+    
+    textos = [nota1.value, nota2.value, nota3.value, nota4.value, nota5.value]
+    
+    if any(t.strip() == "" for t in textos):
+        lbl_alerta.value = "<b style='color:red;'>Alerta: Es obligatorio ingresar las cinco notas.</b>"
+        return
+        
+    notas = []
+
+    for t in textos:
+        try:
+            notas.append(float(t))
+        except ValueError:
+            lbl_alerta.value = "<b style='color:red;'>Alerta: Todos los datos ingresados deben ser numéricos.</b>"
+            return
+            
+    promedio = sum(notas) / len(notas)
+    
+    suma_cuadrados = sum(math.pow(n - promedio, 2) for n in notas)
+    desviacion = math.sqrt(suma_cuadrados / len(notas))
+    
+    mayor = max(notas)
+    menor = min(notas)
+    
+    lbl_promedio.value = f"Promedio = {promedio:.2f}"
+    lbl_desviacion.value = f"Desviación = {desviacion:.2f}"
+    lbl_mayor.value = f"Nota mayor = {mayor}"
+    lbl_menor.value = f"Nota menor = {menor}"
+
+def limpiar_campos(b):
+    nota1.value = ""
+    nota2.value = ""
+    nota3.value = ""
+    nota4.value = ""
+    nota5.value = ""
+    lbl_promedio.value = "Promedio = "
+    lbl_desviacion.value = "Desviación = "
+    lbl_mayor.value = "Nota mayor = "
+    lbl_menor.value = "Nota menor = "
+    lbl_alerta.value = ""
+
+btn_calcular.on_click(calcular_estadisticas)
+btn_limpiar.on_click(limpiar_campos)
+
+
+interfaz = widgets.VBox([
+    widgets.HTML(value="<h3>Cálculo de Notas</h3>"),
+    nota1, nota2, nota3, nota4, nota5,
+    widgets.HBox([btn_calcular, btn_limpiar]),
+    lbl_alerta,
+    lbl_promedio, lbl_desviacion, lbl_mayor, lbl_menor
+])
+
+display(interfaz)
