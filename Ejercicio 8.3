@@ -1,0 +1,135 @@
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+import math
+
+class FiguraGeometrica:
+    def __init__(self):
+        self.volumen = 0.0
+        self.superficie = 0.0
+
+class Cilindro(FiguraGeometrica):
+    def __init__(self, radio, altura):
+        super().__init__()
+        self.radio = radio
+        self.altura = altura
+        self.volumen = math.pi * self.altura * math.pow(self.radio, 2.0)
+        self.superficie = (2.0 * math.pi * self.radio * self.altura) + (2.0 * math.pi * math.pow(self.radio, 2.0))
+
+class Esfera(FiguraGeometrica):
+    def __init__(self, radio):
+        super().__init__()
+        self.radio = radio
+        self.volumen = (4.0/3.0) * math.pi * math.pow(self.radio, 3.0)
+        self.superficie = 4.0 * math.pi * math.pow(self.radio, 2.0)
+
+class Piramide(FiguraGeometrica):
+    def __init__(self, base, altura, apotema):
+        super().__init__()
+        self.base = base
+        self.altura = altura
+        self.apotema = apotema
+        self.volumen = (math.pow(self.base, 2.0) * self.altura) / 3.0
+        self.superficie = math.pow(self.base, 2.0) + (2.0 * self.base * self.apotema)
+
+class Cubo(FiguraGeometrica):
+    def __init__(self, lado):
+        super().__init__()
+        self.lado = lado
+        self.volumen = math.pow(self.lado, 3.0)
+        self.superficie = 6.0 * math.pow(self.lado, 2.0)
+
+class Prisma(FiguraGeometrica):
+    def __init__(self, largo, ancho, altura):
+        super().__init__()
+        self.largo = largo
+        self.ancho = ancho
+        self.altura = altura
+        self.volumen = self.largo * self.ancho * self.altura
+        self.superficie = 2.0 * ((self.largo * self.ancho) + (self.largo * self.altura) + (self.ancho * self.altura))
+
+
+salida_figura = widgets.Output()
+
+def mostrar_ventana_figura(nombre_figura):
+    with salida_figura:
+        clear_output()
+        
+        lbl_titulo = widgets.HTML(f"<h3>{nombre_figura}</h3>")
+        lbl_resultado = widgets.HTML("")
+        btn_calcular = widgets.Button(description="Calcular", button_style='info')
+        
+        svg_figuras = {
+            "Cilindro": '''<svg width="90" height="100">
+                <path d="M10,25 v50 a35,15 0 0,0 70,0 v-50" fill="#00b4d8" stroke="#03045e" stroke-width="2"/>
+                <ellipse cx="45" cy="25" rx="35" ry="15" fill="#90e0ef" stroke="#03045e" stroke-width="2"/>
+            </svg>''',
+            "Esfera": '''<svg width="90" height="90"><circle cx="45" cy="45" r="35" fill="#00b4d8" stroke="#03045e" stroke-width="2"/><ellipse cx="45" cy="45" rx="35" ry="10" fill="none" stroke="#03045e" stroke-width="2" stroke-dasharray="4,2"/></svg>''',
+            "Pirámide": '''<svg width="90" height="100">
+                <polygon points="45,10 15,70 45,85" fill="#00b4d8" stroke="#03045e" stroke-width="2"/>
+                <polygon points="45,10 45,85 75,70" fill="#90e0ef" stroke="#03045e" stroke-width="2"/>
+            </svg>''',
+            "Cubo": '''<svg width="90" height="90"><rect x="15" y="25" width="45" height="45" fill="#00b4d8" stroke="#03045e" stroke-width="2"/><polygon points="15,25 30,10 75,10 60,25" fill="#90e0ef" stroke="#03045e" stroke-width="2"/><polygon points="60,25 75,10 75,55 60,70" fill="#0077b6" stroke="#03045e" stroke-width="2"/></svg>''',
+            "Prisma": '''<svg width="100" height="80"><rect x="10" y="25" width="60" height="40" fill="#00b4d8" stroke="#03045e" stroke-width="2"/><polygon points="10,25 25,10 85,10 70,25" fill="#90e0ef" stroke="#03045e" stroke-width="2"/><polygon points="70,25 85,10 85,50 70,65" fill="#0077b6" stroke="#03045e" stroke-width="2"/></svg>'''
+        }
+        
+        img_widget = widgets.HTML(f"<div style='margin: 10px 20px 10px 0;'>{svg_figuras[nombre_figura]}</div>")
+        
+        entradas = {}
+        if nombre_figura == "Cilindro":
+            entradas['radio'] = widgets.FloatText(description="Radio:")
+            entradas['altura'] = widgets.FloatText(description="Altura:")
+        elif nombre_figura == "Esfera":
+            entradas['radio'] = widgets.FloatText(description="Radio:")
+        elif nombre_figura == "Pirámide":
+            entradas['base'] = widgets.FloatText(description="Base:")
+            entradas['altura'] = widgets.FloatText(description="Altura:")
+            entradas['apotema'] = widgets.FloatText(description="Apotema:")
+        elif nombre_figura == "Cubo":
+            entradas['lado'] = widgets.FloatText(description="Lado:")
+        elif nombre_figura == "Prisma":
+            entradas['largo'] = widgets.FloatText(description="Largo:")
+            entradas['ancho'] = widgets.FloatText(description="Ancho:")
+            entradas['altura'] = widgets.FloatText(description="Altura:")
+            
+        def realizar_calculo(b):
+            try:
+                if nombre_figura == "Cilindro":
+                    fig = Cilindro(entradas['radio'].value, entradas['altura'].value)
+                elif nombre_figura == "Esfera":
+                    fig = Esfera(entradas['radio'].value)
+                elif nombre_figura == "Pirámide":
+                    fig = Piramide(entradas['base'].value, entradas['altura'].value, entradas['apotema'].value)
+                elif nombre_figura == "Cubo":
+                    fig = Cubo(entradas['lado'].value)
+                elif nombre_figura == "Prisma":
+                    fig = Prisma(entradas['largo'].value, entradas['ancho'].value, entradas['altura'].value)
+                
+                lbl_resultado.value = f"<b>Volumen:</b> {fig.volumen:.2f} cm³ <br> <b>Superficie:</b> {fig.superficie:.2f} cm²"
+            except Exception as e:
+                lbl_resultado.value = "<b style='color:red;'>Error en los datos ingresados.</b>"
+                
+        btn_calcular.on_click(realizar_calculo)
+        formulario = widgets.VBox(list(entradas.values()) + [btn_calcular, lbl_resultado])
+        
+        display(widgets.HBox([widgets.VBox([lbl_titulo, img_widget]), formulario]))
+
+
+btn_cilindro = widgets.Button(description="Cilindro", button_style='primary')
+btn_esfera = widgets.Button(description="Esfera", button_style='primary')
+btn_piramide = widgets.Button(description="Pirámide", button_style='primary')
+btn_cubo = widgets.Button(description="Cubo", button_style='primary')
+btn_prisma = widgets.Button(description="Prisma", button_style='primary')
+
+btn_cilindro.on_click(lambda b: mostrar_ventana_figura("Cilindro"))
+btn_esfera.on_click(lambda b: mostrar_ventana_figura("Esfera"))
+btn_piramide.on_click(lambda b: mostrar_ventana_figura("Pirámide"))
+btn_cubo.on_click(lambda b: mostrar_ventana_figura("Cubo"))
+btn_prisma.on_click(lambda b: mostrar_ventana_figura("Prisma"))
+
+menu_principal = widgets.VBox([
+    widgets.HTML("<h2>Menú Principal - Figuras Geométricas</h2>"),
+    widgets.HBox([btn_cilindro, btn_esfera, btn_piramide, btn_cubo, btn_prisma]),
+    salida_figura
+])
+
+display(menu_principal)
